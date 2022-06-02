@@ -1,0 +1,31 @@
+{
+  "name": "com.mopsicus.ubb",
+  "version": "1.0.0",
+  "description": "Telegram bot for building Unity projects",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mopsicus/unity-builder-bot.git"
+  },
+  "keywords": [
+    "telegram",
+    "bot",
+    "unity",
+    "build",
+    "ci/cd"
+  ],
+  "author": "Mopsicus",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mopsicus/unity-builder-bot/issues"
+  },
+  "homepage": "https://github.com/mopsicus/unity-builder-bot#readme",
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "log-timestamp": "^0.3.0",
+    "telegraf": "^4.8.2"
+  }
+}
