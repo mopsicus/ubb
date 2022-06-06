@@ -65,7 +65,7 @@ Telegram bot for build debug Unity projects
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Bot works with <a href="https://github.com/mopsicus/unity-builder-helper">Unity Builder Helper</a> (UBH). Build APK for Google/Huawei and debug IPA for iOS. Upload all files on your server and make HTML page and manifest for install APK or IPA from server.
+Bot works with <a href="https://github.com/mopsicus/ubh">Unity Builder Helper</a> (UBH). Build APK for Google/Huawei and debug IPA for iOS. Upload all files on your server and make HTML page and manifest for install APK or IPA from server.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -107,7 +107,7 @@ Bot uses build script from Unity Builder Helper generates support files for all 
 
 1. Create new bot via BotFather
 2. Get bot token
-3. Add [Unity Builder Helper](https://github.com/mopsicus/unity-builder-helper) to unity project
+3. Add [Unity Builder Helper](https://github.com/mopsicus/ubh) to unity project
 4. Clone the repo
    ```sh
    git clone https://github.com/mopsicus/unity-builder-bot.git
@@ -132,7 +132,7 @@ Bot uses build script from Unity Builder Helper generates support files for all 
 
 `UNITY` Path to installed Unity, i.e. /Applications/Unity/Hub/Editor/2020.3.35f1/Unity.app/Contents/MacOS/Unity
 
-`BUILD_METHOD` Method in [Unity Builder Helper](https://github.com/mopsicus/unity-builder-helper). It will build project and support files for bot.
+`BUILD_METHOD` Method in [Unity Builder Helper](https://github.com/mopsicus/ubh). It will build project and support files for bot.
 
 `TIMEOUT` Timeout for Git and other shell operations
 
