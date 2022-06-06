@@ -257,8 +257,6 @@ Project Link: [https://github.com/mopsicus/unity-builder-bot](https://github.com
 [contributors-url]: https://github.com/mopsicus/unity-builder-bot/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/mopsicus/unity-builder-bot.svg?style=flat
 [forks-url]: https://github.com/mopsicus/unity-builder-bot/network/members
-<!-- [stars-shield]: https://img.shields.io/github/stars/mopsicus/unity-builder-bot.svg?style=flat
-[stars-url]: https://github.com/mopsicus/unity-builder-bot/stargazers -->
 [issues-shield]: https://img.shields.io/github/issues/mopsicus/unity-builder-bot.svg?style=flat
 [issues-url]: https://github.com/mopsicus/unity-builder-bot/issues
 [license-shield]: https://img.shields.io/github/license/mopsicus/unity-builder-bot.svg?style=flat
