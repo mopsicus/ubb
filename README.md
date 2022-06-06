@@ -154,12 +154,14 @@ Bot uses build script from Unity Builder Helper generates support files for all 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+When you run `Remote build` from Unity, bot show message with command and button to run it. Bot will get updates from repo, build and upload files to your server, after that notify you with link to download.
 
 1. Run bot (i.e. `pm2` or `node index.js`)
-2. Open UBH in Unity Editor via hotkey `cmd+g` or menu
-3. Paste your Telegram user ID 
-4. Run build 
+2. See all commands via `/help` command
+3. Add project to bot
+4. Open UBH in Unity Editor via hotkey `cmd+g` or menu
+5. Paste your Telegram user ID 
+6. Run remote build 
 
 ### Commands
 `/add <repository url> <branch>` Add project to bot and checkout branch
