@@ -1,6 +1,6 @@
 require('dotenv').config()
 require('log-timestamp');
-const { Telegraf } = require('telegraf')
+const { Telegraf, Markup } = require('telegraf')
 const { promises: { readdir } } = require('fs')
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
@@ -9,22 +9,31 @@ const fs = require('fs');
 
 let bot
 
+const getUser = async (ctx) => {
+    return (ctx.update.callback_query) ? ctx.update.callback_query.from.id : ctx.update.message.from.id
+}
+
 const checkUser = async (ctx) => {
-    let result = process.env.WHITE_LIST.split(',').includes(String(ctx.update.message.from.id))
+    let from = (ctx.update.callback_query) ? ctx.update.callback_query.from : ctx.update.message.from
+    let result = process.env.WHITE_LIST.split(',').includes(String(from.id))
     if (!result) {
-        console.warn(`unknown user ${ctx.update.message.from}`)
+        console.warn(`unknown user ${from}`)
         throw new Error('unknown user')
     }
 }
 
-const validateCommand = async (text) => {
-    let data = text.split(' ')
+const validateCommand = async (ctx) => {
+    let message = (ctx.update.callback_query) ? ctx.update.callback_query.message.text : ctx.update.message.text
+    let data = message.split(' ')
     switch (data[0].slice(1)) {
         case 'add':
             if (data.length < 2) {
                 throw new Error('repository url is missing')
             }
-            if (data.length > 2) {
+            if (data.length < 3) {
+                throw new Error('branch is missing')
+            }
+            if (data.length > 3) {
                 throw new Error('invalid arguments count')
             }
             if (!data[1].includes('.git')) {
@@ -68,6 +77,7 @@ const validateCommand = async (text) => {
             if (data.length > 4) {
                 throw new Error('invalid arguments count')
             }
+            break;
         case 'build':
             if (data.length < 2) {
                 throw new Error('project name is missing')
@@ -78,7 +88,10 @@ const validateCommand = async (text) => {
             if (data.length < 4) {
                 throw new Error('platform is missing')
             }
-            if (data.length > 4) {
+            if (data.length < 5) {
+                throw new Error('defines is missing')
+            }
+            if (data.length > 5) {
                 throw new Error('invalid arguments count')
             }
             break;
@@ -91,63 +104,80 @@ const validateCommand = async (text) => {
 }
 
 const addProject = async (ctx) => {
+    let user = await getUser(ctx)
     try {
         await checkUser(ctx)
-        let args = await validateCommand(ctx.update.message.text)
+        let args = await validateCommand(ctx)
         let url = args[0];
+        let branch = args[1];
         let project = url.replace(/^.*[\\\/]/, '').slice(0, -4)
-        console.log(`(${ctx.update.message.from.id}) add ${project}`)
+        console.log(`(${user}) add ${project}`)
         let dir = path.join(process.env.PROJECTS_DIR, project);
         await ctx.reply(`[${project}] clone...`)
+        console.log(`(${user}) [${project}] clone...`)
         await exec(`git -C ${process.env.PROJECTS_DIR} clone ${url}`, { timeout: Number(process.env.TIMEOUT) })
-        await ctx.reply(`[${project}] checkout to build branch...`)
-        await exec(`git checkout ${process.env.BUILD_BRANCH}`, { cwd: dir })
+        await ctx.reply(`[${project}] checkout ${branch}...`)
+        console.log(`(${user}) [${project}] checkout ${branch}...`)
+        await exec(`git checkout ${branch}`, { cwd: dir })
+        await ctx.reply(`[${project}] pull updates...`)
+        console.log(`(${user}) [${project}] pull updates...`)
+        await exec(`git pull`, { cwd: dir })
         await ctx.reply(`[${project}] clone core...`)
+        console.log(`(${user}) [${project}] clone core...`)
         await exec(`git clone ${process.env.CORE} Assets/Core`, { cwd: dir, timeout: Number(process.env.TIMEOUT) })
         await ctx.reply(`[${project}] use ${project} as project name`)
         await ctx.reply(`[${project}] done ✅`)
-        console.log(`(${ctx.update.message.from.id}) add ${project} completed`)
+        console.log(`(${user}) add ${project} completed`)
     } catch (error) {
-        console.error(`(${ctx.update.message.from.id}) add failed:`, error)
+        console.error(`(${user}) add failed:`, error)
         await ctx.reply(`error: ${error.message} ❌`)
     }
 }
 
 const removeProject = async (ctx) => {
+    let user = await getUser(ctx)
     try {
         await checkUser(ctx)
-        let args = await validateCommand(ctx.update.message.text)
+        let args = await validateCommand(ctx)
         let project = args[0];
-        console.log(`(${ctx.update.message.from.id}) remove ${project}`)
+        console.log(`(${user}) remove ${project}`)
         let dir = path.join(process.env.PROJECTS_DIR, project);
+        if (!fs.existsSync(dir)) {
+            throw new Error('project not found')
+        }
         await ctx.reply(`[${project}] remove...`)
+        console.log(`(${user}) [${project}] remove...`)
         await exec(`rm -R ${dir}`)
         await ctx.reply(`[${project}] done ✅`)
-        console.log(`(${ctx.update.message.from.id}) remove ${project} completed`)
+        console.log(`(${user}) remove ${project} completed`)
     } catch (error) {
-        console.error(`(${ctx.update.message.from.id}) remove failed:`, error)
+        console.error(`(${user}) remove failed:`, error)
         await ctx.reply(`error: ${error.message} ❌`)
     }
 }
 
 const clearProject = async (ctx) => {
+    let user = await getUser(ctx)
     try {
         await checkUser(ctx)
-        let args = await validateCommand(ctx.update.message.text)
+        let args = await validateCommand(ctx)
         let project = args[0];
-        console.log(`(${ctx.update.message.from.id}) clear ${project}`)
+        console.log(`(${user}) clear ${project}`)
         let dir = path.join(process.env.OUTPUT_DIR, project);
         await ctx.reply(`[${project}] clear logs...`)
+        console.log(`(${user}) [${project}] clear logs...`)
         await exec(`rm -rf ${project}*.log`, { cwd: process.env.LOGS_DIR, timeout: Number(process.env.TIMEOUT) })
         await ctx.reply(`[${project}] clear builds...`)
+        console.log(`(${user}) [${project}] clear builds...`)
         let list = await getConfigs(project)
         for (const item of list) {
+            console.log(`(${user}) [${project}] clear items for ${item}...`)
             await exec(`rm -rf ${item}*`, { cwd: process.env.OUTPUT_DIR, timeout: Number(process.env.TIMEOUT) })
         }
         await ctx.reply(`[${project}] done ✅`)
-        console.log(`(${ctx.update.message.from.id}) clear ${project} completed`)
+        console.log(`(${user}) clear ${project} completed`)
     } catch (error) {
-        console.error(`(${ctx.update.message.from.id}) clear failed:`, error)
+        console.error(`(${user}) clear failed:`, error)
         await ctx.reply(`error: ${error.message} ❌`)
     }
 }
@@ -171,34 +201,36 @@ const getConfigs = async (project) => {
 }
 
 const checkoutProject = async (ctx) => {
+    let user = await getUser(ctx)
     try {
         await checkUser(ctx)
-        let args = await validateCommand(ctx.update.message.text)
+        let args = await validateCommand(ctx)
         let project = args[0];
         let branch = args[1];
-        console.log(`(${ctx.update.message.from.id}) checkout ${project} to ${branch}`)
+        console.log(`(${user}) ${project} checkout ${branch}`)
         let dir = path.join(process.env.PROJECTS_DIR, project);
-        await ctx.reply(`[${project}] checkout to ${branch}...`)
+        await ctx.reply(`[${project}] checkout ${branch}...`)
         if (!fs.existsSync(dir)) {
             throw new Error('project not found')
         }
         await exec(`git checkout ${branch}`, { cwd: dir })
         await ctx.reply(`[${project}] done ✅`)
-        console.log(`(${ctx.update.message.from.id}) checkout ${project} to ${branch} completed`)
+        console.log(`(${user}) ${project} checkout ${branch} completed`)
     } catch (error) {
-        console.error(`(${ctx.update.message.from.id}) checkout failed:`, error)
+        console.error(`(${user}) checkout failed:`, error)
         await ctx.reply(`error: ${error.message} ❌`)
     }
 }
 
 const getLog = async (ctx) => {
+    let user = await getUser(ctx)
     try {
         await checkUser(ctx)
-        let args = await validateCommand(ctx.update.message.text)
+        let args = await validateCommand(ctx)
         let project = args[0];
         let platform = args[1];
         let type = args[2];
-        console.log(`(${ctx.update.message.from.id}) get log ${project} ${platform} ${type}`)
+        console.log(`(${user}) get log ${project} ${platform} ${type}`)
         let file = `${process.env.LOGS_DIR}/${project}-${platform}-${type}.log`;
         await ctx.reply(`[${project}] get log ${platform} ${type}...`)
         if (!fs.existsSync(file)) {
@@ -206,54 +238,64 @@ const getLog = async (ctx) => {
         }
         await ctx.replyWithDocument({ source: file })
         await ctx.reply(`[${project}] done ✅`)
-        console.log(`(${ctx.update.message.from.id}) get log ${project} ${platform} ${type} completed`)
+        console.log(`(${user}) get log ${project} ${platform} ${type} completed`)
     } catch (error) {
-        console.error(`(${ctx.update.message.from.id}) get log:`, error)
+        console.error(`(${user}) get log:`, error)
         await ctx.reply(`error: ${error.message} ❌`)
     }
 }
 
 const listProjects = async (ctx) => {
+    let user = await getUser(ctx)
     try {
         await checkUser(ctx)
-        console.log(`(${ctx.update.message.from.id}) request project list`)
+        console.log(`(${user}) request project list`)
         let list = await readdir(process.env.PROJECTS_DIR, { withFileTypes: true })
         let dirs = list.filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
         await ctx.reply('[builder] projects list...')
         await ctx.reply(dirs.join('\n'))
         await ctx.reply('[builder] done ✅')
-        console.log(`(${ctx.update.message.from.id}) request project list completed`)
+        console.log(`(${user}) request project list completed`)
     } catch (error) {
-        console.error(`(${ctx.update.message.from.id}) request project list failed:`, error)
+        console.error(`(${user}) request project list failed:`, error)
         await ctx.reply(`error: ${error.message} ❌`)
     }
 }
 
 const buildProject = async (ctx) => {
+    let user = await getUser(ctx)
     try {
         await checkUser(ctx)
-        let args = await validateCommand(ctx.update.message.text)
+        let args = await validateCommand(ctx)
         let project = args[0];
         let branch = args[1];
         let platform = args[2]
+        let defines = args[3]
         let target = (platform === 'google' || platform === 'huawei') ? 'android' : platform
         let dir = path.join(process.env.PROJECTS_DIR, project);
         let output = path.resolve(process.env.OUTPUT_DIR)
-        console.log(`(${ctx.update.message.from.id}) build ${project}`)
         await ctx.reply(`[${project}] building...`)
+        console.log(`(${user}) [${project}] building...`)
         if (!fs.existsSync(dir)) {
             throw new Error('project not found')
         }
-        await ctx.reply(`[${project}] checkout to ${branch}...`)
+        await ctx.reply(`[${project}] checkout ${branch}...`)
+        console.log(`(${user}) [${project}] checkout ${branch}...`)
         await exec(`git checkout ${branch}`, { cwd: dir })
+        await ctx.reply(`[${project}] restore changes...`)
+        console.log(`(${user}) [${project}] restore changes...`)
+        await exec(`git restore .`, { cwd: dir })
         await ctx.reply(`[${project}] pull updates...`)
+        console.log(`(${user}) [${project}] pull updates...`)
         await exec('git pull', { cwd: dir })
         await ctx.reply(`[${project}] build unity...`)
-        await exec(`${process.env.UNITY} -batchmode -quit -projectPath ${dir} -executeMethod ${process.env.BUILD_METHOD} -output ${output} -platform ${platform} -project ${project} -buildTarget ${target} -logFile ${process.env.LOGS_DIR}/${project}-${platform}-build.log`)
+        console.log(`(${user}) [${project}] build unity...`)
+        await exec(`${process.env.UNITY} -batchmode -quit -projectPath ${dir} -executeMethod ${process.env.BUILD_METHOD} -output ${output} -platform ${platform} -project ${project} -defines "${defines}" -buildTarget ${target} -logFile ${process.env.LOGS_DIR}/${project}-${platform}-build.log`)
         let data = await fs.promises.readFile(path.join(output, `${project}.${platform}.build.json`));
         let config = JSON.parse(data.toString())
         if (platform === 'ios') {
             await ctx.reply(`[${project}] build xcode...`)
+            console.log(`(${user}) [${project}] build xcode...`)
             dir = path.resolve(process.env.OUTPUT_DIR, config.source);
             output = path.resolve(process.env.OUTPUT_DIR, config.source, 'build');
             if (!fs.existsSync(output)) {
@@ -262,24 +304,29 @@ const buildProject = async (ctx) => {
             let xproject = (fs.existsSync(`${dir}/Unity-iPhone.xcworkspace`)) ? `-workspace ${dir}/Unity-iPhone.xcworkspace` : `-project ${dir}/Unity-iPhone.xcodeproj`
             await exec(`xcodebuild ${xproject} -scheme Unity-iPhone -quiet > ${process.env.LOGS_DIR}/${project}-${platform}-xcode-build.log 2>&1`, { timeout: Number(process.env.TIMEOUT) })
             await ctx.reply(`[${project}] archive xcode...`)
+            console.log(`(${user}) [${project}] archive xcode...`)
             await exec(`xcodebuild ${xproject} -scheme Unity-iPhone archive -archivePath ${output}/Unity-iPhone.xcarchive -quiet > ${process.env.LOGS_DIR}/${project}-${platform}-xcode-archive.log 2>&1`, { timeout: Number(process.env.TIMEOUT) })
-            await prepareOptions(config, ctx.update.message.from.id)
+            await prepareOptions(config, user)
             await ctx.reply(`[${project}] export IPA...`)
-            let options = path.resolve(process.env.OUTPUT_DIR, `${config.source}.options.plist`, ctx.update.message.from.id)
+            console.log(`(${user}) [${project}] export IPA...`)
+            let options = path.resolve(process.env.OUTPUT_DIR, `${config.source}.options.plist`, user)
             await exec(`xcodebuild -exportArchive -archivePath ${output}/Unity-iPhone.xcarchive -exportOptionsPlist ${options} -exportPath ${output} -allowProvisioningUpdates -quiet > ${process.env.LOGS_DIR}/${project}-${platform}-xcode-export.log 2>&1`, { timeout: Number(process.env.TIMEOUT) })
             await ctx.reply(`[${project}] patch manifest...`)
+            console.log(`(${user}) [${project}] patch manifest...`)
             await exec(`mv ${output}/*.ipa ${process.env.OUTPUT_DIR}/${config.source}.ipa`, { timeout: Number(process.env.TIMEOUT) })
-            await patchManifest(project, config, ctx.update.message.from.id)
+            await patchManifest(project, config, user)
         }
         await ctx.reply(`[${project}] generate page...`)
-        await generateHTML(project, platform, config, ctx.update.message.from.id)
+        console.log(`(${user}) [${project}] generate page...`)
+        await generateHTML(project, platform, config, user)
         await ctx.reply(`[${project}] upload files...`)
-        let url = await upload(platform, config, ctx.update.message.from.id)
+        console.log(`(${user}) [${project}] upload files...`)
+        let url = await upload(platform, config, user)
         await ctx.reply(`[${project}] ${url}`)
         await ctx.reply(`[${project}] done ✅`)
-        console.log(`(${ctx.update.message.from.id}) build ${project} completed`)
+        console.log(`(${user}) build ${project} completed`)
     } catch (error) {
-        console.error(`(${ctx.update.message.from.id}) build failed:`, error)
+        console.error(`(${user}) build failed:`, error)
         await ctx.reply(`error: ${error.message} ❌`)
     }
 }
@@ -344,22 +391,24 @@ const patchManifest = async (project, config, user) => {
 }
 
 const getHelp = async (ctx) => {
+    let user = await getUser(ctx)
     try {
-        console.log(`(${ctx.update.message.from.id}) get help`)
+        console.log(`(${user}) get help`)
         let list = await readdir(process.env.PROJECTS_DIR, { withFileTypes: true })
         let dirs = list.filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
         await ctx.reply('[builder] commands list...')
-        await ctx.replyWithHTML('<code>/add git@github.com:username/project.git</code>\n add project to bot')
+        await ctx.replyWithHTML('<code>/add git@github.com:username/project.git develop</code>\n add project to bot and checkout branch')
         await ctx.replyWithHTML('<code>/remove project</code>\n remove project')
-        await ctx.replyWithHTML('<code>/checkout project build</code>\n checkout git branch')
-        await ctx.replyWithHTML('<code>/build project build ios|android</code>\n build project and upload to host')
-        await ctx.replyWithHTML('<code>/log project ios|android build|xcode-build|xcode-archive|xcode-export</code>\n get log file')
+        await ctx.replyWithHTML('<code>/checkout project develop</code>\n checkout git branch')
+        await ctx.replyWithHTML('<code>/build project develop ios|android defines</code>\n build project and upload to host')
+        await ctx.replyWithHTML('<code>/log project ios|android build|xcode-build|xcode-archive|xcode-export</code>\n get log files')
         await ctx.replyWithHTML('<code>/clear project</code>\n clear builds and logs')
         await ctx.replyWithHTML('<code>/list</code>\n list all projects in bot')
+        await ctx.replyWithHTML('<code>/help</code>\n show this help')
         await ctx.reply('[builder] done ✅')
-        console.log(`(${ctx.update.message.from.id}) get help completed`)
+        console.log(`(${user}) get help completed`)
     } catch (error) {
-        console.error(`(${ctx.update.message.from.id}) get help failed:`, error)
+        console.error(`(${user}) get help failed:`, error)
         await ctx.reply(`error: ${error.message} ❌`)
     }
 }
@@ -397,6 +446,7 @@ const launch = async () => {
     bot.command('build', (ctx) => buildProject(ctx))
     bot.command('clear', (ctx) => clearProject(ctx))
     bot.command('log', (ctx) => getLog(ctx))
+    bot.action('build', (ctx) => buildProject(ctx))
     bot.help((ctx) => getHelp(ctx))
     bot.catch(err => console.error('ACHTUNG', err))
     await bot.launch()
@@ -408,9 +458,9 @@ const start = async () => {
     try {
         await init();
         await launch();
-        console.log(`bot ${bot.botInfo.id} started`)
+        console.log(`UBB started`)
     } catch (error) {
-        console.error(`start failed:`, error.message)
+        console.error(`start failed:`, error)
     }
 }
 
