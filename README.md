@@ -12,7 +12,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/mopsicus/unity-builder-bot">
-    <img src="images/logo.png" alt="Logo" width="1280" height="1280">
+    <img src="images/logo.png" alt="Logo" width="1280" height="320">
   </a>
 
 <h3 align="center">Unity Builder Bot</h3>
