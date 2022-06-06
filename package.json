@@ -1,6 +1,7 @@
 {
   "name": "com.mopsicus.ubb",
   "version": "1.0.0",
+  "displayName": "Unity Builder Bot",
   "description": "Telegram bot for building Unity projects",
   "main": "index.js",
   "scripts": {
@@ -15,6 +16,12 @@
     "bot",
     "unity",
     "build",
+    "xcode",
+    "upload",
+    "sshpass",
+    "android",
+    "apk",
+    "ipa",
     "ci/cd"
   ],
   "author": "Mopsicus",

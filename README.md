@@ -1,92 +1,265 @@
-# Unity Builder Bot (UBB)
-Telegram bot for build debug Unity projects. 
-Bot works with [Unity Builder Helper](https://github.com/mopsicus/unity-builder-helper) (UBH).
-Build APK for Google/Huawei and debug IPA for iOS. 
-Upload all files on your server and make HTML page and manifest for install APK or IPA from server.
+<div id="top"></div>
+<!--
+*** Thanks for checking out the Best-README-Template. If you have a suggestion
+*** that would make this better, please fork the repo and create a pull request
+*** or simply open an issue with the tag "enhancement".
+*** Don't forget to give the project a star!
+*** Thanks again! Now go create something AMAZING! :D
+-->
 
-## Features
-1. Add project from Git repository
-2. Remove project
-3. List all projects
-4. Checkout project branch
-5. Update repository before build
-6. Build Unity project
-7. Build Xcode project
-8. Compile, archive and export to IPA with configurated manifest
-9. Generate HTML with install links
-10. Upload all objects to remote server via sshpass
-11. Get build logs for project
-12. Clear project's logs and builds
 
-## Requirements
+
+<!-- PROJECT SHIELDS -->
+<!--
+*** I'm using markdown "reference style" links for readability.
+*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
+*** See the bottom of this document for the declaration of the reference variables
+*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
+*** https://www.markdownguide.org/basic-syntax/#reference-style-links
+-->
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+
+
+
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/mopsicus/unity-builder-bot">
+    <img src="images/logo.png" alt="Logo" width="1024" height="512">
+  </a>
+
+<h3 align="center">Unity Builder Bot</h3>
+
+  <p align="center">
+Telegram bot for build debug Unity projects
+    <br />
+    <a href="https://github.com/mopsicus/unity-builder-bot/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/mopsicus/unity-builder-bot/issues">Request Feature</a>
+  </p>
+</div>
+
+
+
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+        <li><a href="#features">Features</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#requirements">Requirements</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#options">Options</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#usage">Usage</a>
+      <ul>
+        <li><a href="#commands">Commands</a></li>
+      </ul>      
+    </li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</details>
+
+
+
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+Bot works with <a href="https://github.com/mopsicus/unity-builder-helper">Unity Builder Helper</a> (UBH). Build APK for Google/Huawei and debug IPA for iOS. Upload all files on your server and make HTML page and manifest for install APK or IPA from server.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+### Built With
+
+* [Node.js](https://nodejs.org)
+* [Telegraf.js](https://telegraf.js.org)
+
+### Features
+
+* Add project from Git repository
+* Remove project
+* List all projects
+* Checkout project branch
+* Update repository before build
+* Build Unity project
+* Build Xcode project
+* Compile, archive and export to IPA with configurated manifest
+* Generate HTML with install links
+* Upload all objects to remote server via sshpass
+* Get build logs for project
+* Clear project's logs and builds
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- GETTING STARTED -->
+## Getting Started
+
+Bot uses build script from Unity Builder Helper generates support files for all bot steps, but you can use your own with modifications.
+
+### Requirements
 1. Node.js
 2. sshpass
-3. The steady hands
+3. Mac OS for building Xcode projects
+4. The steady hands
 
-## Installation
-1. Pull repository
-2. Run ```npm install```
+### Installation
 
-## How to use
 1. Create new bot via BotFather
 2. Get bot token
-3. Edit ```.env``` file
-5. Add [Unity Builder Helper](https://github.com/mopsicus/unity-builder-helper) to unity project
-4. Run bot (i.e. ```pm2``` or ```node index.js```)
-5. Get bot ID from console
-5. Open UBH via hotkey ```cmd+g``` or menu
-6. Paste bot ID 
-7. Run build 
+3. Add [Unity Builder Helper](https://github.com/mopsicus/unity-builder-helper) to unity project
+4. Clone the repo
+   ```sh
+   git clone https://github.com/mopsicus/unity-builder-bot.git
+   ```
+5. Install NPM packages
+   ```sh
+   npm install
+   ```
+6. Edit `.env` file
 
-## Commands
-```/add <repository url>``` Add project to bot
+### Options
 
-```/remove <project name>``` Remove project
+`BOT_TOKEN` Telegram bot token
 
-```/checkout <project name> <branch>``` Checkout git branch
+`WHITE_LIST` List of users separated by comma can send commands to bot. You can get your ID by [@userinfobot](https://t.me/userinfobot)
 
-```/build <project name> <branch> <platform>``` Build project and upload to host
+`PROJECTS_DIR` Directory for projects
 
-```/log <project name> <platform> <type>``` Get log file
+`OUTPUT_DIR` Directory for builds
 
-```/clear <project name>``` Clear builds and logs
+`LOGS_DIR` Directory for logs
 
-```/list``` Request projects list
+`UNITY` Path to installed Unity, i.e. /Applications/Unity/Hub/Editor/2020.3.35f1/Unity.app/Contents/MacOS/Unity
 
-```/help``` Show commands list
+`BUILD_METHOD` Method in [Unity Builder Helper](https://github.com/mopsicus/unity-builder-helper). It will build project and support files for bot.
 
-## Options
-```BOT_TOKEN``` Telegram bot token
+`TIMEOUT` Timeout for Git and other shell operations
 
-```WHITE_LIST``` List of users separated by comma can send commands to bot. You can get your ID by [@userinfobot](https://t.me/userinfobot)
+`REMOTE_PATH` Url for downloading builds, i.e. https://mopsicus.ru/builds
 
-```PROJECTS_DIR``` Directory for projects
+`IOS_TEAM` Your iOS Team ID for signing Xcode project
 
-```OUTPUT_DIR``` Directory for builds
+`SSH_LOGIN` SSH login
 
-```LOGS_DIR``` Directory for logs
+`SSH_PASS` SSH password
 
-```UNITY``` Path to installed Unity, i.e. /Applications/Unity/Hub/Editor/2020.3.35f1/Unity.app/Contents/MacOS/Unity
+`SSH_HOST` Host for uploading files
 
-```BUILD_METHOD``` Method in [Unity Builder Helper](https://github.com/mopsicus/unity-builder-helper). It will build project and support files for bot.
+`SSH_PATH` Path on host for storing files, i.e. ~/domains/mopsicus.ru/builds/
 
-```TIMEOUT``` Timeout for Git and other shell operations
+<p align="right">(<a href="#top">back to top</a>)</p>
 
-```BUILD_BRANCH``` Default branch to build
 
-```REMOTE_PATH``` Url for downloading builds, i.e. https://mopsicus.ru/builds
+<!-- USAGE EXAMPLES -->
+## Usage
 
-```IOS_TEAM``` Your iOS Team ID for signing Xcode project
+Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
 
-```SSH_LOGIN``` SSH login
+1. Run bot (i.e. `pm2` or `node index.js`)
+2. Open UBH in Unity Editor via hotkey `cmd+g` or menu
+3. Paste your Telegram user ID 
+4. Run build 
 
-```SSH_PASS``` SSH password
+### Commands
+`/add <repository url> <branch>` Add project to bot and checkout branch
 
-```SSH_HOST``` Host for uploading files
+`/remove <project name>` Remove project
 
-```SSH_PATH``` Path on host for storing files, i.e. ~/domains/mopsicus.ru/builds/
+`/checkout <project name> <branch>` Checkout git branch
 
+`/build <project name> <branch> <platform> <defines>` Build project and upload to host
+
+`/log <project name> <platform> <type>` Get log files
+
+`/clear <project name>` Clear builds and logs
+
+`/list` Request projects list
+
+`/help` Show commands list
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- ROADMAP -->
 ## Roadmap
-1. Add WebGL build
-2. Add iOS production build
-3. Add upload to AppStore
+
+- [ ] Add WebGL build
+- [ ] Add iOS production build
+- [ ] Add upload to AppStore
+
+See the [open issues](https://github.com/mopsicus/unity-builder-bot/issues) for a full list of proposed features (and known issues).
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+
+<!-- CONTRIBUTING -->
+## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+
+<!-- LICENSE -->
+## License
+
+Distributed under the MIT License. See `LICENSE` file for more information.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+
+<!-- CONTACT -->
+## Contact
+
+Mopsicus: mail@mopsicus.ru
+
+Website: https://mopsicus.ru
+
+Telegram: https://t.me/mopsicus 
+
+Project Link: [https://github.com/mopsicus/unity-builder-bot](https://github.com/mopsicus/unity-builder-bot)
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[contributors-shield]: https://img.shields.io/github/contributors/mopsicus/unity-builder-bot.svg?style=flat
+[contributors-url]: https://github.com/mopsicus/unity-builder-bot/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/mopsicus/unity-builder-bot.svg?style=flat
+[forks-url]: https://github.com/mopsicus/unity-builder-bot/network/members
+[stars-shield]: https://img.shields.io/github/stars/mopsicus/unity-builder-bot.svg?style=flat
+[stars-url]: https://github.com/mopsicus/unity-builder-bot/stargazers
+[issues-shield]: https://img.shields.io/github/issues/mopsicus/unity-builder-bot.svg?style=flat
+[issues-url]: https://github.com/mopsicus/unity-builder-bot/issues
+[license-shield]: https://img.shields.io/github/license/mopsicus/unity-builder-bot.svg?style=flat
+[license-url]: https://github.com/mopsicus/unity-builder-bot/blob/master/LICENSE.txt
