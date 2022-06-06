@@ -18,7 +18,6 @@
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
 [![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 
@@ -261,4 +260,4 @@ Project Link: [https://github.com/mopsicus/unity-builder-bot](https://github.com
 [issues-shield]: https://img.shields.io/github/issues/mopsicus/unity-builder-bot.svg?style=flat
 [issues-url]: https://github.com/mopsicus/unity-builder-bot/issues
 [license-shield]: https://img.shields.io/github/license/mopsicus/unity-builder-bot.svg?style=flat
-[license-url]: https://github.com/mopsicus/unity-builder-bot/blob/master/LICENSE
+[license-url]: https://github.com/mopsicus/unity-builder-bot/blob/main/LICENSE
