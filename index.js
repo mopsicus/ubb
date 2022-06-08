@@ -303,7 +303,7 @@ const buildProject = async (ctx) => {
             await ctx.reply(`[${project}] archive xcode...`)
             console.log(`(${user}) [${project}] archive xcode...`)
             await exec(`xcodebuild ${xproject} -scheme Unity-iPhone archive -archivePath ${output}/Unity-iPhone.xcarchive -quiet > ${process.env.LOGS_DIR}/${project}-${platform}-xcode-archive.log 2>&1`, { timeout: Number(process.env.TIMEOUT) })
-            await prepareOptions(config, user)
+            await prepareOptions(project, config, user)
             await ctx.reply(`[${project}] export IPA...`)
             console.log(`(${user}) [${project}] export IPA...`)
             let options = path.resolve(process.env.OUTPUT_DIR, `${config.source}.options.plist`, user)
@@ -329,7 +329,7 @@ const buildProject = async (ctx) => {
 }
 
 const upload = async (platform, config, user) => {
-    console.log(`(${user}) upload ${config.name}`)
+    console.log(`(${user}) [${project}] upload ${config.name}`)
     let pageFile = `${config.source}.${platform}.html`
     let page = path.resolve(process.env.OUTPUT_DIR, pageFile)
     if (platform === 'ios') {
@@ -340,12 +340,12 @@ const upload = async (platform, config, user) => {
         let build = path.resolve(process.env.OUTPUT_DIR, `${config.source}.apk`)
         await exec(`sshpass -p ${process.env.SSH_PASS} scp ${page} ${build} ${process.env.SSH_LOGIN}@${process.env.SSH_HOST}:${process.env.SSH_PATH}`, { timeout: Number(process.env.TIMEOUT) })
     }
-    console.log(`(${user}) upload ${config.name} completed`)
+    console.log(`(${user}) [${project}] upload ${config.name} completed`)
     return `${process.env.REMOTE_PATH}/${pageFile}`
 }
 
 const generateHTML = async (project, platform, config, user) => {
-    console.log(`(${user}) generate HTML ${config.name}`)
+    console.log(`(${user}) [${project}] generate HTML ${config.name}`)
     let output = path.resolve(process.env.OUTPUT_DIR)
     let data = await fs.promises.readFile(path.resolve('files/template.html'))
     let html = data.toString()
@@ -357,22 +357,22 @@ const generateHTML = async (project, platform, config, user) => {
         .replace('{URL}', url)
     let page = `${config.source}.${platform}.html`
     fs.promises.writeFile(path.join(output, page), html)
-    console.log(`(${user}) generate HTML ${config.name} completed`)
+    console.log(`(${user}) [${project}] generate HTML ${config.name} completed`)
 }
 
-const prepareOptions = async (config, user) => {
-    console.log(`(${user}) prepare options ${config.name}`)
+const prepareOptions = async (project, config, user) => {
+    console.log(`(${user}) [${project}] prepare options ${config.name}`)
     let output = path.resolve(process.env.OUTPUT_DIR)
     let data = await fs.promises.readFile(path.resolve('files/options.plist'))
     let plist = data.toString()
     plist = plist.replace('{TEAM}', process.env.IOS_TEAM)
     let page = `${config.source}.options.plist`
     fs.promises.writeFile(path.join(output, page), plist)
-    console.log(`(${user}) prepare options ${config.name} completed`)
+    console.log(`(${user}) [${project}] prepare options ${config.name} completed`)
 }
 
 const patchManifest = async (project, config, user) => {
-    console.log(`(${user}) patch manifest ${config.name}`)
+    console.log(`(${user}) [${project}] patch manifest ${config.name}`)
     let output = path.resolve(process.env.OUTPUT_DIR)
     let data = await fs.promises.readFile(path.resolve('files/manifest.plist'))
     let plist = data.toString()
@@ -384,7 +384,7 @@ const patchManifest = async (project, config, user) => {
         .replace('{URL}', url)
     let page = `${config.source}.plist`
     fs.promises.writeFile(path.join(output, page), plist)
-    console.log(`(${user}) patch manifest ${config.name} completed`)
+    console.log(`(${user}) [${project}] patch manifest ${config.name} completed`)
 }
 
 const getHelp = async (ctx) => {
