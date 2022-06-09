@@ -57,6 +57,7 @@ Telegram bot for build debug Unity projects
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
     <li><a href="#contact">Contact</a></li>
+    <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
@@ -232,5 +233,12 @@ Website: https://mopsicus.ru
 Telegram: https://t.me/mopsicus 
 
 Project Link: [https://github.com/mopsicus/unity-builder-bot](https://github.com/mopsicus/unity-builder-bot)
+
+<p align="right">(<a href="#top">back to top</a>)</p>
+
+<!-- ACKNOWLEDGMENTS -->
+## Acknowledgments
+
+* [Leopotam](https://github.com/leopotam) for the tip on sshpass
 
 <p align="right">(<a href="#top">back to top</a>)</p>
